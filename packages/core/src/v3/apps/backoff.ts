@@ -331,10 +331,6 @@ export class ExponentialBackoff {
             error: error.message,
           };
         }
-
-        if (error instanceof AttemptTimeout) {
-          continue;
-        }
       } finally {
         elapsedMs += Date.now() - start;
         clearTimeout(attemptTimeout);

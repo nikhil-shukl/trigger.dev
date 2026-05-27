@@ -24,4 +24,28 @@ describe("ExponentialBackoff", () => {
     });
     expect(attempts).toBe(1);
   });
+
+  it("stops execute retries when attempt timeouts exceed maxElapsed", async () => {
+    const backoff = new ExponentialBackoff("NoJitter", {
+      factor: 0,
+      maxElapsed: 0.01,
+      maxRetries: 5,
+    });
+    let attempts = 0;
+
+    const result = await backoff.execute(
+      async () => {
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return "done";
+      },
+      { attemptTimeoutMs: 25 }
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.cause).toBe("Timeout");
+    }
+    expect(attempts).toBe(1);
+  });
 });
